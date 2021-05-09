@@ -11,14 +11,14 @@ outputCountryImage = "country_cases.png"
 
 def getSummary(res, title):
     summaryMapToday = {
-        "New Cases Today": "confirmed",
-        "New Recovered Today": "recovered",
-        "New Deaths Today": "deaths",
+        "- Cases": "confirmed",
+        "- Recovered": "recovered",
+        "- Deaths": "deaths",
     }
     summaryMapTotal = {
-        "Total Cases": "confirmed",
-        "Total Recovered": "recovered",
-        "Total Deaths": "deaths",
+        "- Cases": "confirmed",
+        "- Recovered": "recovered",
+        "- Deaths": "deaths",
     }
     current_index = -1
     currentData = res[list(res)[current_index]]
@@ -41,10 +41,12 @@ def getSummary(res, title):
     table = pt.PrettyTable(["Stat", "Count"])
     table.align["Stat"] = "l"
     table.align["Count"] = "r"
+    table.add_row(["Today", ""])
     for key, value in summaryMapToday.items():
         if value in currentData:
             outputNum = format(currentData[value] - secondLastData[value], ",d")
             table.add_row([key, outputNum])
+    table.add_row(["Total", ""])
     for key, value in summaryMapTotal.items():
         if value in currentData:
             outputNum = format(currentData[value], ",d")

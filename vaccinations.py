@@ -111,11 +111,11 @@ def getSummaryData(url, title):
     outputString = (
         "<b>" + title + "</b>\n<i>(As of " + jsonData["data"][-1]["date"] + ")</i>\n"
     )
-    summary["New Vaccinated"] = jsonData["data"][-1]["change_vaccinations"]
-    summary["Total Vaccinated"] = jsonData["data"][-1]["total_vaccinations"]
+    summary["Today"] = jsonData["data"][-1]["change_vaccinations"]
+    summary["Total"] = jsonData["data"][-1]["total_vaccinations"]
 
-    table = pt.PrettyTable(["Stat", "Count"])
-    table.align["Stat"] = "l"
+    table = pt.PrettyTable(["Vaccinated", "Count"])
+    table.align["Vaccinated"] = "l"
     table.align["Count"] = "r"
     for key, value in summary.items():
         outputNum = format(value, ",d")
