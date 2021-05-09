@@ -3,6 +3,7 @@ from covid.api import CovId19Data
 from matplotlib import pyplot as plt
 import pandas as pd
 import numpy as np
+import prettytable as pt
 
 outputStateImage = "state_cases.png"
 outputCountryImage = "country_cases.png"
@@ -25,17 +26,22 @@ def getSummary(res, title):
 
     secondLastData = res[list(res)[current_index - 1]]
     date = pd.to_datetime(list(res)[current_index]).date()
-    outputString = "<b>Summary for " + title + " <i>(as of " + str(date) + ")</i></b>\n"
+    outputString = "<b>Summary for " + title + "</b>\n<i>(as of " + str(date) + ")</i>\n"
+    table = pt.PrettyTable(['Stat', 'Count'])
+    table.align['Stat'] = 'l'
+    table.align['Count'] = 'r'
     for key, value in summaryMapToday.items():
         if value in currentData:
-            outputString += "- " + key + ": "
-            outputString += format(currentData[value] - secondLastData[value], ',d') + "\n"
+            outputNum = format(currentData[value] - secondLastData[value], ',d')
+            table.add_row([key, outputNum])
     for key, value in summaryMapTotal.items():
         if value in currentData:
-            outputString += "- " + key + ": "
-            outputString += format(currentData[value], ',d') + "\n"
+            outputNum = format(currentData[value], ',d')
+            table.add_row([key, outputNum])
+    if len(summaryMapToday.items()) > 0:
+        outputString += f'<pre>{table}</pre>'
 
-    return outputString.title()
+    return outputString
 
 def getCountrySummary(country = "canada"):
     covid_api = CovId19Data(force=False)
@@ -93,7 +99,8 @@ def plottingfunction(date, cases, deaths, title, outputImage) -> None:
     fig.savefig(outputImage, format='png', dpi=100, bbox_inches='tight')
     plt.close()
 
-def plotData(res, key, title = "COVID Cases", outputImage = "current_plot.png"):
+def plotData(res, key, title = "COVID Cases",
+             outputImage = "current_plot.png"):
     days = []
     y_data = []
     y2_data = []

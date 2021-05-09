@@ -12,6 +12,7 @@ import urllib.request
 import json
 from matplotlib import pyplot as plt
 import pandas as pd
+import prettytable as pt
 
 stateVaccineImage = "state_vaccines.png"
 canadaVaccineImage = "canada_vaccines.png"
@@ -98,13 +99,17 @@ def plotVaccinations(province = "Ontario") -> bool:
 def getSummaryData(url, title):
     summary = {}
     jsonData = json.loads(urllib.request.urlopen(url).read().decode())
-    outputString = "<b>" + title + " <i>(As of " + jsonData['data'][-1]['date'] + ")</i>:</b>\n"
+    outputString = "<b>" + title + "</b>\n<i>(As of " + jsonData['data'][-1]['date'] + ")</i>\n"
     summary['New Vaccinated'] = jsonData['data'][-1]['change_vaccinations']
     summary['Total Vaccinated'] = jsonData['data'][-1]['total_vaccinations']
 
+    table = pt.PrettyTable(['Stat', 'Count'])
+    table.align['Stat'] = 'l'
+    table.align['Count'] = 'r'
     for key, value in summary.items():
-        outputString += "- " + str(key) + ": ";
-        outputString += format(value,',d') + "\n"
+        outputNum = format(value,',d')
+        table.add_row([str(key), outputNum])
+    outputString += f'<pre>{table}</pre>'
     outputString += "\n"
 
     return outputString
