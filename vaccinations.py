@@ -98,7 +98,7 @@ def plotVaccinations(province = "Ontario") -> bool:
 def getSummaryData(url, title):
     summary = {}
     jsonData = json.loads(urllib.request.urlopen(url).read().decode())
-    outputString = title + " (As of " + jsonData['data'][-1]['date'] + "):\n"
+    outputString = "<b>" + title + " <i>(As of " + jsonData['data'][-1]['date'] + ")</i>:</b>\n"
     summary['New Vaccinated'] = jsonData['data'][-1]['change_vaccinations']
     summary['Total Vaccinated'] = jsonData['data'][-1]['total_vaccinations']
 

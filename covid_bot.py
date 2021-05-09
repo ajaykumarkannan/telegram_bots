@@ -76,10 +76,10 @@ def getSummary(country = None, state = None) -> str:
     if state != None:
         state = state.lower()
         stateSummary = covid_stats_plotter.getRegionSummary(state)
-        stateSummary += vaccinations.getSummary(state)
+        stateSummary += "\n" + vaccinations.getSummary(state)
 
     if country == "canada":
-        countrySummary += vaccinations.getCanadaSummary()
+        countrySummary += "\n" + vaccinations.getCanadaSummary()
 
     return (countrySummary + stateSummary)
 
@@ -88,7 +88,9 @@ def alarm(context: CallbackContext, country = "canada", state = "ontario") -> No
     try:
         context.bot.send_chat_action(context.job.context, action=ChatAction.UPLOAD_PHOTO)
         context.bot.send_media_group(context.job.context, getGraphs(country, state))
-        context.bot.send_message(context.job.context, text=getSummary(country, state))
+        context.bot.send_message(context.job.context,
+                                 text=getSummary(country, state),
+                                 parse_mode='HTML')
     except:
         context.bot.send_message(context.job.context, text="Sorry, encountered an error :(")
 
@@ -134,11 +136,13 @@ def get_once(update: Update, context: CallbackContext) -> None:
             state = str(" ".join(context.args[1:])).lower()
         update.message.reply_chat_action(action=ChatAction.UPLOAD_PHOTO)
         update.message.reply_media_group(getGraphs(country=country, state=state))
-        update.message.reply_text(getSummary(country=country, state=state))
+        update.message.reply_text(getSummary(country=country,
+                                             state=state),
+                                  parse_mode='HTML')
     except (IndexError, ValueError):
         update.message.reply_text("Usage: /now [country] [region]")
-    except:
-        update.message.reply_text("Country or State not found")
+    # except:
+    #     update.message.reply_text("Country or State not found")
 
 def daily(update: Update, context: CallbackContext) -> None:
     """Add a job to the queue."""
