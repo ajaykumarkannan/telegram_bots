@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
 from telegram import Update
-from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext
+from telegram.ext import (
+    Updater,
+    CommandHandler,
+    MessageHandler,
+    Filters,
+    CallbackContext,
+)
 from telegram import InputMediaPhoto, ParseMode, ChatAction
 import time
 import logging
@@ -13,7 +19,7 @@ import datetime
 
 # Enable logging
 logging.basicConfig(
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s', level=logging.INFO
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO
 )
 
 logger = logging.getLogger(__name__)
@@ -21,19 +27,22 @@ logger = logging.getLogger(__name__)
 # Define a few command handlers. These usually take the two arguments update and
 # context. Error handlers also receive the raised TelegramError object in error.
 def help(update: Update, _: CallbackContext) -> None:
-    update.message.reply_text('Help Menu:\n'
-                             '/now [country] [state/province] - to get the data at this moment\n'
-                             '/repeat <hours> [country] [state/province] - to set a recurrence.\n'
-                             '/daily HH:MM [country] [state/province] - to set a daily schedule in UTC time\n'
-                             '/jobs - List the scheduled jobs\n'
-                             '/delete <N> - Delete Nth job\n'
-                             '/delete all - Delete all jobs\n'
-                             '/country <country> -  to print stats for a given country\n'
-                             '/country_list -  List all of the countries\n'
-                             '/region <region> -  print stats for a given region\n'
-                             '/region_list -  print a list of regions\n'
-                             '/help -  to print this menu\n'
-                             '/info -  to print the README')
+    update.message.reply_text(
+        "Help Menu:\n"
+        "/now [country] [state/province] - to get the data at this moment\n"
+        "/repeat <hours> [country] [state/province] - to set a recurrence.\n"
+        "/daily HH:MM [country] [state/province] - to set a daily schedule in UTC time\n"
+        "/jobs - List the scheduled jobs\n"
+        "/delete <N> - Delete Nth job\n"
+        "/delete all - Delete all jobs\n"
+        "/country <country> -  to print stats for a given country\n"
+        "/country_list -  List all of the countries\n"
+        "/region <region> -  print stats for a given region\n"
+        "/region_list -  print a list of regions\n"
+        "/help -  to print this menu\n"
+        "/info -  to print the README"
+    )
+
 
 def info(update: Update, _: CallbackContext) -> None:
     readme = open("README.md", "r")
@@ -41,7 +50,8 @@ def info(update: Update, _: CallbackContext) -> None:
     update.message.reply_text(outString)
     readme.close()
 
-def getGraphs(country = "canada", state = "ontario"):
+
+def getGraphs(country="canada", state="ontario"):
     images = []
     if country != None:
         images.append(covid_stats_plotter.outputCountryImage)
@@ -67,7 +77,8 @@ def getGraphs(country = "canada", state = "ontario"):
 
     return imageFiles
 
-def getSummary(country = None, state = None) -> str:
+
+def getSummary(country=None, state=None) -> str:
     countrySummary = ""
     stateSummary = ""
     if country != None:
@@ -81,18 +92,24 @@ def getSummary(country = None, state = None) -> str:
     if country == "canada":
         countrySummary += "\n" + vaccinations.getCanadaSummary()
 
-    return (countrySummary + stateSummary)
+    return countrySummary + stateSummary
 
-def alarm(context: CallbackContext, country = "canada", state = "ontario") -> None:
+
+def alarm(context: CallbackContext, country="canada", state="ontario") -> None:
     """Send the alarm message."""
     try:
-        context.bot.send_chat_action(context.job.context, action=ChatAction.UPLOAD_PHOTO)
+        context.bot.send_chat_action(
+            context.job.context, action=ChatAction.UPLOAD_PHOTO
+        )
         context.bot.send_media_group(context.job.context, getGraphs(country, state))
-        context.bot.send_message(context.job.context,
-                                 text=getSummary(country, state),
-                                 parse_mode='HTML')
+        context.bot.send_message(
+            context.job.context, text=getSummary(country, state), parse_mode="HTML"
+        )
     except:
-        context.bot.send_message(context.job.context, text="Sorry, encountered an error :(")
+        context.bot.send_message(
+            context.job.context, text="Sorry, encountered an error :("
+        )
+
 
 def list_jobs(update: Update, context: CallbackContext) -> None:
     current_jobs = context.job_queue.get_jobs_by_name(str(update.message.chat_id))
@@ -106,6 +123,7 @@ def list_jobs(update: Update, context: CallbackContext) -> None:
             count += 1
     update.message.reply_text(outString)
 
+
 def delete_job(update: Update, context: CallbackContext) -> None:
     current_jobs = context.job_queue.get_jobs_by_name(str(update.message.chat_id))
     if not current_jobs:
@@ -117,12 +135,13 @@ def delete_job(update: Update, context: CallbackContext) -> None:
             if str(context.args[0]) == "all":
                 jobs = current_jobs
             else:
-                jobs.append(current_jobs[int(context.args[0])-1])
+                jobs.append(current_jobs[int(context.args[0]) - 1])
             for job in jobs:
                 update.message.reply_text("Deleting job: " + str(job.trigger))
                 job.schedule_removal()
         except (IndexError, ValueError):
             update.message.reply_text("Job not found.")
+
 
 def get_once(update: Update, context: CallbackContext) -> None:
     """Add a job to the queue."""
@@ -136,13 +155,14 @@ def get_once(update: Update, context: CallbackContext) -> None:
             state = str(" ".join(context.args[1:])).lower()
         update.message.reply_chat_action(action=ChatAction.UPLOAD_PHOTO)
         update.message.reply_media_group(getGraphs(country=country, state=state))
-        update.message.reply_text(getSummary(country=country,
-                                             state=state),
-                                  parse_mode='HTML')
+        update.message.reply_text(
+            getSummary(country=country, state=state), parse_mode="HTML"
+        )
     except (IndexError, ValueError):
         update.message.reply_text("Usage: /now [country] [region]")
-    # except:
-    #     update.message.reply_text("Country or State not found")
+    except:
+        update.message.reply_text("Country or State not found")
+
 
 def daily(update: Update, context: CallbackContext) -> None:
     """Add a job to the queue."""
@@ -159,23 +179,30 @@ def daily(update: Update, context: CallbackContext) -> None:
             state = None
         if len(context.args) >= 3:
             state = str(" ".join(context.args[2:])).lower()
-        getDataFunc = lambda context: alarm(context=context, country=country, state=state)
-        context.job_queue.run_daily(getDataFunc, time.time(), context=chat_id, name=str(chat_id))
+        getDataFunc = lambda context: alarm(
+            context=context, country=country, state=state
+        )
+        context.job_queue.run_daily(
+            getDataFunc, time.time(), context=chat_id, name=str(chat_id)
+        )
 
-        text = 'Schedule successfully set!'
+        text = "Schedule successfully set!"
         update.message.reply_text(text)
 
     except (IndexError, ValueError):
-        update.message.reply_text('Usage: /daily <HH:MM Time in UTC> [Country] [Region]')
+        update.message.reply_text(
+            "Usage: /daily <HH:MM Time in UTC> [Country] [Region]"
+        )
+
 
 def repeat_timer(update: Update, context: CallbackContext) -> None:
     """Add a job to the queue."""
     chat_id = update.message.chat_id
     try:
         # args[0] should contain the time for the timer in hours
-        due = int(context.args[0]) # * 3600
+        due = int(context.args[0]) * 3600
         if due < 0:
-            update.message.reply_text('Sorry we can not go back to future!')
+            update.message.reply_text("Sorry we can not go back to future!")
             return
 
         country = "canada"
@@ -186,14 +213,19 @@ def repeat_timer(update: Update, context: CallbackContext) -> None:
         if len(context.args) >= 3:
             state = str(" ".join(context.args[2:])).lower()
 
-        getDataFunc = lambda context: alarm(context=context, country=country, state=state)
-        context.job_queue.run_repeating(getDataFunc, due, context=chat_id, name=str(chat_id))
+        getDataFunc = lambda context: alarm(
+            context=context, country=country, state=state
+        )
+        context.job_queue.run_repeating(
+            getDataFunc, due, context=chat_id, name=str(chat_id)
+        )
 
-        text = 'Recurrance successfully set!'
+        text = "Recurrance successfully set!"
         update.message.reply_text(text)
 
     except (IndexError, ValueError):
-        update.message.reply_text('Usage: /repeat <hours> [Country] [Region]')
+        update.message.reply_text("Usage: /repeat <hours> [Country] [Region]")
+
 
 def country_data(update: Update, context: CallbackContext) -> None:
     """Add a job to the queue."""
@@ -205,8 +237,11 @@ def country_data(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(getSummary(country=country))
 
     except:
-        update.message.reply_text('Usage: /country <country>\n'
-                                  'Check the list of countries to see if your input is not valid')
+        update.message.reply_text(
+            "Usage: /country <country>\n"
+            "Check the list of countries to see if your input is not valid"
+        )
+
 
 def country_list(update: Update, context: CallbackContext) -> None:
     """Add a job to the queue."""
@@ -226,13 +261,17 @@ def region_data(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(getSummary(state=region))
 
     except:
-        update.message.reply_text('Usage: /region <region>\n'
-                                  'Check the list of regions to see if your input is not valid')
+        update.message.reply_text(
+            "Usage: /region <region>\n"
+            "Check the list of regions to see if your input is not valid"
+        )
+
 
 def region_list(update: Update, context: CallbackContext) -> None:
     """Add a job to the queue."""
     chat_id = update.message.chat_id
     update.message.reply_text(covid_stats_plotter.getListOfRegions())
+
 
 def main() -> None:
     """Run bot."""
@@ -265,6 +304,5 @@ def main() -> None:
     updater.idle()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()
-
