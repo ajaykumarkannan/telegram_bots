@@ -234,7 +234,7 @@ def country_data(update: Update, context: CallbackContext) -> None:
         # args[0] should contain the country
         country = " ".join(context.args).title()
         update.message.reply_media_group(getGraphs(country=country, state=None))
-        update.message.reply_text(getSummary(country=country))
+        update.message.reply_text(getSummary(country=country), parse_mode="HTML")
 
     except:
         update.message.reply_text(
@@ -258,7 +258,7 @@ def region_data(update: Update, context: CallbackContext) -> None:
 
         chat_id = update.message.chat_id
         update.message.reply_media_group(getGraphs(state=region, country=None))
-        update.message.reply_text(getSummary(state=region))
+        update.message.reply_text(getSummary(state=region), parse_mode="HTML")
 
     except:
         update.message.reply_text(
