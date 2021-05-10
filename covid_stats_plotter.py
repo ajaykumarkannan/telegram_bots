@@ -5,12 +5,13 @@ from matplotlib import ticker as pltticker
 import pandas as pd
 import numpy as np
 import prettytable as pt
+from countryinfo import CountryInfo
 
 outputStateImage = "state_cases.png"
 outputCountryImage = "country_cases.png"
 
 
-def getSummary(res, title):
+def getSummary(res, title, population = None):
     summaryMapToday = {
         "- Cases": "confirmed",
         "- Recovered": "recovered",
@@ -52,6 +53,10 @@ def getSummary(res, title):
         if value in currentData:
             outputNum = format(currentData[value], ",d")
             table.add_row([key, outputNum])
+        if value == "confirmed" and population != None:
+            pop_per_mil = population / 1000000.0
+            cases_per_mil = format(int((currentData[value] / pop_per_mil)), ",d")
+            table.add_row(["- Cases/mil", cases_per_mil])
     if len(summaryMapToday.items()) > 0:
         outputString += f"<pre>{table}</pre>"
 
@@ -62,7 +67,13 @@ def getCountrySummary(country="canada"):
     covid_api = CovId19Data(force=False)
     country_key = country.lower().replace(" ", "_")
     res = covid_api.get_history_by_country(country)[country_key]["history"]
-    return getSummary(res, country)
+    population = None
+    try:
+        countryData = CountryInfo(country)
+        population = countryData.population()
+    except KeyError:
+        print("Counldn't find the population for " + country)
+    return getSummary(res, country, population)
 
 
 def getRegionSummary(region="Ontario"):
@@ -161,8 +172,6 @@ def plotData(res, key, title="COVID Cases", outputImage="current_plot.png"):
 def main():
     print(getCountrySummary("India"))
     print(getRegionSummary("Ontario"))
-    plotCountryCases(country="canada")
-
 
 if __name__ == "__main__":
     main()

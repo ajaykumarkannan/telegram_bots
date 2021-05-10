@@ -49,6 +49,24 @@ urlSuffix = {
     "YT": "YT",
 }
 
+populationData = {
+    "AB": 4428112,
+    "BC": 5145851,
+    "MB": 1379584,
+    "NB": 781315,
+    "NL": 520998,
+    "NS": 979115,
+    "NT": 45074,
+    "NU": 39285,
+    "ON": 14733119,
+    "PE": 159713,
+    "QC": 8575779,
+    "SK": 1177884,
+    "YT": 42176,
+}
+
+canadaPopulation = sum(populationData.values())
+
 
 def plotVaccinationsForURL(url, title="Vaccinations", outputImage="vaccinations.png"):
     jsonData = json.loads(urllib.request.urlopen(url).read().decode())
@@ -112,7 +130,7 @@ def plotVaccinations(province="Ontario") -> bool:
         return True
 
 
-def getSummaryData(url, title):
+def getSummaryData(url, title, population):
     summary = {}
     jsonData = json.loads(urllib.request.urlopen(url).read().decode())
     outputString = (
@@ -127,6 +145,9 @@ def getSummaryData(url, title):
     for key, value in summary.items():
         outputNum = format(value, ",d")
         table.add_row([str(key), outputNum])
+        if key == "Total":
+            vaxPercent = str(min(100, int(100 * value / population))) + "%"
+            table.add_row(["Vax %", vaxPercent])
     outputString += f"<pre>{table}</pre>"
     outputString += "\n"
 
@@ -134,7 +155,7 @@ def getSummaryData(url, title):
 
 
 def getCanadaSummary() -> str:
-    return getSummaryData(urlCanada, "Canada Vaccinations").title()
+    return getSummaryData(urlCanada, "Canada Vaccinations", canadaPopulation).title()
 
 
 def getSummary(province="Ontario"):
@@ -142,14 +163,20 @@ def getSummary(province="Ontario"):
     provinceString = ""
     if province in urlSuffix:
         provinceString = getSummaryData(
-            urlProvince + urlSuffix[province], province.title() + " Vaccinations"
+            urlProvince + urlSuffix[province],
+            province.title() + " Vaccinations",
+            populationData[urlSuffix[province]],
         )
     return provinceString.title()
 
 
 def main() -> None:
     for (key, item) in urlSuffix.items():
-        print(getSummaryData(urlProvince + item, key + " Vaccinations"))
+        print(
+            getSummaryData(
+                urlProvince + item, key + " Vaccinations", populationData[item]
+            )
+        )
 
 
 if __name__ == "__main__":
