@@ -11,7 +11,7 @@ outputStateImage = "state_cases.png"
 outputCountryImage = "country_cases.png"
 
 
-def getSummary(res, title, population = None):
+def getSummary(res, title, population=None):
     summaryMapToday = {
         "- Cases": "confirmed",
         "- Recovered": "recovered",
@@ -172,6 +172,7 @@ def plotData(res, key, title="COVID Cases", outputImage="current_plot.png"):
 def main():
     print(getCountrySummary("India"))
     print(getRegionSummary("Ontario"))
+
 
 if __name__ == "__main__":
     main()
