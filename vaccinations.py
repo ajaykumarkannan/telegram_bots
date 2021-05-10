@@ -11,6 +11,7 @@ And sends an automated response to a Telegram group via the Telegram Bot wheresm
 import urllib.request
 import json
 from matplotlib import pyplot as plt
+from matplotlib import ticker as pltticker
 import pandas as pd
 import prettytable as pt
 
@@ -75,15 +76,21 @@ def plotVaccinationsForURL(url, title="Vaccinations", outputImage="vaccinations.
     ax.set_title(title)
     ln1 = ax.plot(dates, total_vaccinations, label="Total Vaccinations")
     ln2 = ax.plot(dates, total_vaccines_distributed, "r", label="Vaccines Distributed")
+    ax.get_yaxis().set_major_formatter(
+        pltticker.FuncFormatter(lambda x, p: format(int(x), ","))
+    )
     ax.set_ylabel("Total Vaccinations")
     plt.xticks(rotation=45)
     ax2 = ax.twinx()
     ln3 = ax2.plot(dates, new_vaccinations, "b", label="New Vaccintations (7-day avg)")
+    ax2.get_yaxis().set_major_formatter(
+        pltticker.FuncFormatter(lambda x, p: format(int(x), ","))
+    )
     ax2.set_ylabel("New Vaccinations")
     lns = ln1 + ln2 + ln3
     labs = [l.get_label() for l in lns]
     ax.legend(lns, labs, loc=0)
-    fig.savefig(outputImage, format="png", dpi=100, bbox_inches="tight")
+    fig.savefig(outputImage, format="png", dpi=300, bbox_inches="tight")
     plt.close()
 
 

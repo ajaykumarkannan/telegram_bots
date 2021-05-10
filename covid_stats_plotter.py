@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 from covid.api import CovId19Data
 from matplotlib import pyplot as plt
+from matplotlib import ticker as pltticker
 import pandas as pd
 import numpy as np
 import prettytable as pt
@@ -106,17 +107,23 @@ def plottingfunction(date, cases, deaths, title, outputImage) -> None:
     ax.set_title(title + " (7-day Average)")
     lns1 = ax.plot(date, cases, label="Cases")
     ax.set_ylabel("Cases")
+    ax.get_yaxis().set_major_formatter(
+        pltticker.FuncFormatter(lambda x, p: format(int(x), ","))
+    )
     ax.legend()
     plt.xticks(rotation=45)
     ax2 = ax.twinx()
     lns2 = ax2.plot(date, deaths, "r", label="Deaths")
+    ax2.get_yaxis().set_major_formatter(
+        pltticker.FuncFormatter(lambda x, p: format(int(x), ","))
+    )
     ax2.set_ylabel("Deaths")
     lns = lns1 + lns2
     labs = [l.get_label() for l in lns]
     ax.legend(lns, labs, loc=0)
     fig.subplots_adjust(bottom=0.2)
     # plt.xticks(rotation=45)
-    fig.savefig(outputImage, format="png", dpi=100, bbox_inches="tight")
+    fig.savefig(outputImage, format="png", dpi=300, bbox_inches="tight")
     plt.close()
 
 
@@ -154,6 +161,7 @@ def plotData(res, key, title="COVID Cases", outputImage="current_plot.png"):
 def main():
     print(getCountrySummary("India"))
     print(getRegionSummary("Ontario"))
+    plotCountryCases(country="canada")
 
 
 if __name__ == "__main__":
