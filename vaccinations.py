@@ -130,24 +130,36 @@ def plotVaccinations(province="Ontario") -> bool:
         return True
 
 
+def tableAddSection(title, summary, table, population) -> None:
+    table.add_row([title, ""])
+    for key, value in summary.items():
+        outputNum = format(value, ",d")
+        table.add_row([str(key), outputNum])
+        if key == "- Total":
+            vaxPercent = min(100, 100.0 * value / population)
+            vaxPercentStr = "{:.2f}".format(vaxPercent) + "%"
+            table.add_row(["- Vax %", vaxPercentStr])
+
+
 def getSummaryData(url, title, population):
     summary = {}
     jsonData = json.loads(urllib.request.urlopen(url).read().decode())
     outputString = (
         "<b>" + title + "</b>\n<i>(As of " + jsonData["data"][-1]["date"] + ")</i>\n"
     )
-    summary["Today"] = jsonData["data"][-1]["change_vaccinations"]
-    summary["Total"] = jsonData["data"][-1]["total_vaccinations"]
 
     table = pt.PrettyTable(["Vaccinated", "Count"])
     table.align["Vaccinated"] = "l"
     table.align["Count"] = "r"
-    for key, value in summary.items():
-        outputNum = format(value, ",d")
-        table.add_row([str(key), outputNum])
-        if key == "Total":
-            vaxPercent = str(min(100, int(100 * value / population))) + "%"
-            table.add_row(["Vax %", vaxPercent])
+
+    summary["- Today"] = jsonData["data"][-1]["change_vaccinations"]
+    summary["- Total"] = jsonData["data"][-1]["total_vaccinations"]
+    tableAddSection("1-shot", summary, table, population)
+
+    summary["- Today"] = jsonData["data"][-1]["change_vaccinated"]
+    summary["- Total"] = jsonData["data"][-1]["total_vaccinated"]
+    tableAddSection("2-shot", summary, table, population)
+
     outputString += f"<pre>{table}</pre>"
     outputString += "\n"
 
