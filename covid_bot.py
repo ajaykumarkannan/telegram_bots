@@ -30,14 +30,14 @@ def help(update: Update, _: CallbackContext) -> None:
     update.message.reply_text(
         "Help Menu:\n"
         "/now [country] [state/province] - to get the data at this moment\n"
-        "/repeat <hours> [country] [state/province] - to set a recurrence.\n"
+        "/repeat [hours] [country] [state/province] - to set a recurrence.\n"
         "/daily HH:MM [country] [state/province] - to set a daily schedule in UTC time\n"
         "/jobs - List the scheduled jobs\n"
-        "/delete <N> - Delete Nth job\n"
+        "/delete [N] - Delete Nth job\n"
         "/delete all - Delete all jobs\n"
-        "/country <country> -  to print stats for a given country\n"
+        "/country [country] -  to print stats for a given country\n"
         "/country_list -  List all of the countries\n"
-        "/region <region> -  print stats for a given region\n"
+        "/region [region] -  print stats for a given region\n"
         "/region_list -  print a list of regions\n"
         "/help -  to print this menu\n"
         "/info -  to print the README"
@@ -224,7 +224,7 @@ def repeat_timer(update: Update, context: CallbackContext) -> None:
         update.message.reply_text(text)
 
     except (IndexError, ValueError):
-        update.message.reply_text("Usage: /repeat <hours> [Country] [Region]")
+        update.message.reply_text("Usage: /repeat [hours] [Country] [Region]")
 
 
 def country_data(update: Update, context: CallbackContext) -> None:
@@ -238,7 +238,7 @@ def country_data(update: Update, context: CallbackContext) -> None:
 
     except:
         update.message.reply_text(
-            "Usage: /country <country>\n"
+            "Usage: /country [country]\n"
             "Check the list of countries to see if your input is not valid"
         )
 
@@ -262,7 +262,7 @@ def region_data(update: Update, context: CallbackContext) -> None:
 
     except:
         update.message.reply_text(
-            "Usage: /region <region>\n"
+            "Usage: /region [region]\n"
             "Check the list of regions to see if your input is not valid"
         )
 

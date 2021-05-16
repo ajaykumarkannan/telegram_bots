@@ -72,10 +72,13 @@ def plotVaccinationsForURL(url, title="Vaccinations", outputImage="vaccinations.
     jsonData = json.loads(urllib.request.urlopen(url).read().decode())
     dates = []
     total_vaccinations = []
+    total_vaccinated = []
     total_vaccines_distributed = []
     new_vaccinations = []
+    new_vaccinated = []
     windowSize = 7
     movingWindow = 7 * [0]
+    movingWindow2 = 7 * [0]
     index = 0
     last = 0
 
@@ -85,27 +88,46 @@ def plotVaccinationsForURL(url, title="Vaccinations", outputImage="vaccinations.
             dates.append(date)
             total_vaccinations.append(day_data["total_vaccinations"])
             total_vaccines_distributed.append(day_data["total_vaccines_distributed"])
+            total_vaccinated.append(day_data["total_vaccinated"])
             movingWindow[index] = day_data["change_vaccinations"]
+            movingWindow2[index] = day_data["change_vaccinated"]
             new_vaccinations.append(sum(movingWindow) / len(movingWindow))
+            new_vaccinated.append(sum(movingWindow2) / len(movingWindow2))
             last = index
             index = 0 if (index == (windowSize - 1)) else (index + 1)
 
     fig, ax = plt.subplots()
     ax.set_title(title)
-    ln1 = ax.plot(dates, total_vaccinations, label="Total Vaccinations")
-    ln2 = ax.plot(dates, total_vaccines_distributed, "r", label="Vaccines Distributed")
+    ln1 = ax.plot(dates, total_vaccinations, color="c", label="Total Vaccinations")
+    ln2 = ax.plot(
+        dates, total_vaccines_distributed, color="r", label="Vaccines Distributed"
+    )
+    ln3 = ax.plot(dates, total_vaccinated, color="m", label="Fully Vaccinated")
     ax.get_yaxis().set_major_formatter(
         pltticker.FuncFormatter(lambda x, p: format(int(x), ","))
     )
     ax.set_ylabel("Total Vaccinations")
     plt.xticks(rotation=45)
+
+    # Second axis
     ax2 = ax.twinx()
-    ln3 = ax2.plot(dates, new_vaccinations, "b", label="New Vaccintations (7-day avg)")
+    ln4 = ax2.plot(
+        dates,
+        new_vaccinations,
+        color="b",
+        label="New Vaccintations (7-day avg)",
+    )
+    ln5 = ax2.plot(
+        dates,
+        new_vaccinated,
+        color="k",
+        label="New Fully Vaxxed (7-day avg)",
+    )
     ax2.get_yaxis().set_major_formatter(
         pltticker.FuncFormatter(lambda x, p: format(int(x), ","))
     )
     ax2.set_ylabel("New Vaccinations")
-    lns = ln1 + ln2 + ln3
+    lns = ln1 + ln2 + ln3 + ln4 + ln5
     labs = [l.get_label() for l in lns]
     ax.legend(lns, labs, loc=0)
     fig.savefig(outputImage, format="png", dpi=300, bbox_inches="tight")
@@ -189,6 +211,8 @@ def main() -> None:
                 urlProvince + item, key + " Vaccinations", populationData[item]
             )
         )
+
+    plotCanadaVaccinations()
 
 
 if __name__ == "__main__":
