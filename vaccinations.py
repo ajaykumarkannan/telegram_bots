@@ -90,7 +90,10 @@ def plotVaccinationsForURL(url, title="Vaccinations", outputImage="vaccinations.
             total_vaccines_distributed.append(day_data["total_vaccines_distributed"])
             total_vaccinated.append(day_data["total_vaccinated"])
             movingWindow[index] = day_data["change_vaccinations"]
-            movingWindow2[index] = day_data["change_vaccinated"]
+            if day_data["change_vaccinated"] != None:
+                movingWindow2[index] = day_data["change_vaccinated"]
+            else:
+                movingWindow2[index] = 0
             new_vaccinations.append(sum(movingWindow) / len(movingWindow))
             new_vaccinated.append(sum(movingWindow2) / len(movingWindow2))
             last = index
@@ -146,7 +149,7 @@ def plotVaccinations(province="Ontario") -> bool:
     else:
         plotVaccinationsForURL(
             urlProvince + urlSuffix[province],
-            "Vaccinations for " + province.title(),
+            "Vaccinations for " + province,
             stateVaccineImage,
         )
         return True
