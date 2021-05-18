@@ -174,8 +174,14 @@ def getSummaryData(url, title, population):
     table.align["Vaccinated"] = "l"
     table.align["Count"] = "r"
 
-    summary["- Today"] = jsonData["data"][-1]["change_vaccinations"]
-    summary["- Total"] = jsonData["data"][-1]["total_vaccinations"]
+    summary["- Today"] = (
+        jsonData["data"][-1]["change_vaccinations"]
+        - jsonData["data"][-1]["change_vaccinated"]
+    )
+    summary["- Total"] = (
+        jsonData["data"][-1]["total_vaccinations"]
+        - jsonData["data"][-1]["total_vaccinated"]
+    )
     tableAddSection("1-shot", summary, table, population)
 
     summary["- Today"] = jsonData["data"][-1]["change_vaccinated"]
