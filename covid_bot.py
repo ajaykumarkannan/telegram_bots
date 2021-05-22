@@ -14,6 +14,7 @@ from telegram_token_key import m_token
 from covid.lib.errors import CountryNotFound
 import covid_stats_plotter
 import vaccinations
+import global_vaccinations
 import os
 import datetime
 
@@ -91,6 +92,8 @@ def getSummary(country=None, state=None) -> str:
 
     if country == "canada":
         countrySummary += "\n" + vaccinations.getCanadaSummary()
+    else:
+        countrySummary += "\n" + global_vaccinations.getCountrySummary(country)
 
     return countrySummary + stateSummary
 

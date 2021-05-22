@@ -221,7 +221,7 @@ def main() -> None:
             )
         )
 
-    plotCanadaVaccinations()
+    print(getCanadaSummary())
 
 
 if __name__ == "__main__":
