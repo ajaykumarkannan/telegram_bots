@@ -64,6 +64,9 @@ def getGraphs(country="canada", state="ontario"):
     if country == "canada":
         images.append(vaccinations.canadaVaccineImage)
         vaccinations.plotCanadaVaccinations()
+    else:
+        images.append(global_vaccinations.countryVaccineImage)
+        global_vaccinations.plotCountryVaccinations(country)
 
     if state != None and vaccinations.plotVaccinations(state):
         images.append(vaccinations.stateVaccineImage)

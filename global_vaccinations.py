@@ -3,8 +3,10 @@ import csv
 import pandas as pd
 import prettytable as pt
 import wget
+from matplotlib import pyplot as plt
+from matplotlib import ticker as pltticker
 
-covid_data = None
+countryVaccineImage = "country_vaccine.png"
 
 
 def loadDataset() -> pd.DataFrame:
@@ -16,29 +18,12 @@ def loadDataset() -> pd.DataFrame:
         [
             "location",
             "date",
-            "total_cases",
-            "new_cases",
-            "new_cases_smoothed",
-            "total_deaths",
-            "new_deaths",
-            "new_deaths_smoothed",
-            "total_cases_per_million",
-            "new_cases_per_million",
-            "new_cases_smoothed_per_million",
-            "total_deaths_per_million",
-            "new_deaths_per_million",
-            "new_deaths_smoothed_per_million",
-            "positive_rate",
-            "total_vaccinations",
-            "people_vaccinated",
-            "people_fully_vaccinated",
             "new_vaccinations",
             "new_vaccinations_smoothed",
-            "total_vaccinations_per_hundred",
+            "people_vaccinated",
             "people_vaccinated_per_hundred",
+            "people_fully_vaccinated",
             "people_fully_vaccinated_per_hundred",
-            "new_vaccinations_smoothed_per_million",
-            "population",
         ]
     ]
     return selection
@@ -47,11 +32,12 @@ def loadDataset() -> pd.DataFrame:
 def getCountryData(country: str = "Canada") -> pd.DataFrame:
     covid_df = loadDataset()
     country_df = covid_df.loc[covid_df["location"] == country].set_index("date")
+    del country_df["location"]
     return country_df
 
 
-def getCountrySummary(country: str = "Canada") -> str:
-    country = country.title()
+def getCountryString(input_country: str) -> str:
+    country = input_country.title()
     countryRemap = {
         "USA": "United States",
         "US": "United States",
@@ -60,16 +46,13 @@ def getCountrySummary(country: str = "Canada") -> str:
     }
     if country.upper() in countryRemap:
         country = countryRemap[country.upper()]
+
+    return country
+
+
+def getCountrySummary(country: str = "Canada") -> str:
+    country = getCountryString(country)
     country_df = getCountryData(country)
-    country_df = country_df[
-        [
-            "new_vaccinations",
-            "people_vaccinated",
-            "people_vaccinated_per_hundred",
-            "people_fully_vaccinated",
-            "people_fully_vaccinated_per_hundred",
-        ]
-    ]
     currentIndex = country_df.last_valid_index()
     if currentIndex == None:
         raise IndexError()
@@ -90,6 +73,8 @@ def getCountrySummary(country: str = "Canada") -> str:
         "people_fully_vaccinated_per_hundred": "Vax %",
     }
     for cName, cData in most_recent.iteritems():
+        if cName.find("smoothed") >= 0:
+            continue
         isPercent = cName.find("per_hundred") >= 0
         isTotal = isTotal or (cName.find("fully") >= 0)
         if isTotal and not second_title_added:
@@ -109,7 +94,63 @@ def getCountrySummary(country: str = "Canada") -> str:
     return outputString
 
 
+def plotCountryVaccinations(country: str = "United States"):
+    country_df = getCountryData(getCountryString(country))
+    title_mapping = {
+        "new_vaccinations_smoothed": "New Vaccinations",
+        "people_vaccinated_per_hundred": "1-shot %",
+        "people_fully_vaccinated_per_hundred": "2-shot %",
+    }
+    set = [
+        "people_vaccinated_per_hundred",
+        "people_fully_vaccinated_per_hundred",
+        "new_vaccinations_smoothed",
+    ]
+    current_df = country_df[set].copy()
+
+    fig, ax = plt.subplots()
+    ax.set_title("Vaccinations for " + country)
+    current_df.rename(columns=title_mapping, inplace=True)
+    current_df.plot(
+        kind="line",
+        color="c",
+        figsize=(10, 6),
+        rot=30,
+        ax=ax,
+        y="1-shot %",
+    )
+    current_df.plot(
+        kind="line",
+        color="r",
+        figsize=(10, 6),
+        rot=30,
+        ax=ax,
+        y="2-shot %",
+    )
+    ax2 = current_df.plot(
+        kind="line",
+        color="m",
+        figsize=(10, 6),
+        rot=30,
+        ax=ax,
+        y="New Vaccinations",
+        secondary_y=True,
+    )
+
+    ax.set_xlabel("")
+    ax.set_ylabel("Total Vaccinations")
+    ax2.set_ylabel("New Vaccinations")
+    ax2.get_yaxis().set_major_formatter(
+        pltticker.FuncFormatter(lambda x, p: format(int(x), ","))
+    )
+
+    fig.tight_layout()
+    fig.savefig(countryVaccineImage, format="png", dpi=300, bbox_inches="tight")
+    plt.close()
+
+
 def main() -> None:
+    plotCountryVaccinations()
     print(getCountrySummary("US"))
     print(getCountrySummary("UK"))
     print(getCountrySummary("Canada"))
