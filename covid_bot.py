@@ -57,19 +57,17 @@ def getGraphs(country="canada", state="ontario"):
     if country != None:
         images.append(covid_stats_plotter.outputCountryImage)
         covid_stats_plotter.plotCountryCases(country)
+        if country.lower() == "canada":
+            images.append(vaccinations.canadaVaccineImage)
+            vaccinations.plotCanadaVaccinations()
+        else:
+            images.append(global_vaccinations.countryVaccineImage)
+            global_vaccinations.plotCountryVaccinations(country)
     if state != None:
         images.append(covid_stats_plotter.outputStateImage)
         covid_stats_plotter.plotStateCases(state)
-
-    if country == "canada":
-        images.append(vaccinations.canadaVaccineImage)
-        vaccinations.plotCanadaVaccinations()
-    else:
-        images.append(global_vaccinations.countryVaccineImage)
-        global_vaccinations.plotCountryVaccinations(country)
-
-    if state != None and vaccinations.plotVaccinations(state):
-        images.append(vaccinations.stateVaccineImage)
+        if vaccinations.plotVaccinations(state):
+            images.append(vaccinations.stateVaccineImage)
 
     imageFiles = []
     for image in images:
@@ -88,15 +86,15 @@ def getSummary(country=None, state=None) -> str:
     if country != None:
         country = country.lower()
         countrySummary = covid_stats_plotter.getCountrySummary(country)
+        if country.lower() == "canada":
+            countrySummary += "\n" + vaccinations.getCanadaSummary()
+        else:
+            countrySummary += "\n" + global_vaccinations.getCountrySummary(country)
+
     if state != None:
         state = state.lower()
         stateSummary = covid_stats_plotter.getRegionSummary(state)
         stateSummary += "\n" + vaccinations.getSummary(state)
-
-    if country == "canada":
-        countrySummary += "\n" + vaccinations.getCanadaSummary()
-    else:
-        countrySummary += "\n" + global_vaccinations.getCountrySummary(country)
 
     return countrySummary + stateSummary
 

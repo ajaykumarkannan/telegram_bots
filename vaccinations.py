@@ -68,12 +68,16 @@ populationData = {
 canadaPopulation = sum(populationData.values())
 
 
-def plotVaccinationsForURL(url, title="Vaccinations", outputImage="vaccinations.png"):
+def plotVaccinationsForURL(
+    url: str,
+    title: str = "Vaccinations",
+    outputImage: str = "vaccinations.png",
+    population: str = None,
+) -> None:
     jsonData = json.loads(urllib.request.urlopen(url).read().decode())
     dates = []
     total_vaccinations = []
     total_vaccinated = []
-    total_vaccines_distributed = []
     new_vaccinations = []
     new_vaccinated = []
     windowSize = 7
@@ -82,13 +86,23 @@ def plotVaccinationsForURL(url, title="Vaccinations", outputImage="vaccinations.
     index = 0
     last = 0
 
+    if population == None:
+        raise ValueError("Population data missing for plotting the vaccination data.")
+
     for day_data in jsonData["data"]:
         date = pd.to_datetime(day_data["date"])
         if date > pd.Timestamp(2020, 12, 15):
             dates.append(date)
-            total_vaccinations.append(day_data["total_vaccinations"])
-            total_vaccines_distributed.append(day_data["total_vaccines_distributed"])
-            total_vaccinated.append(day_data["total_vaccinated"])
+            if day_data["total_vaccinations"] == None:
+                total_vax = 0
+            else:
+                total_vax = day_data["total_vaccinations"] * 100.0 / population
+            if day_data["total_vaccinated"] == None:
+                total_full_vax = 0
+            else:
+                total_full_vax = day_data["total_vaccinated"] * 100.0 / population
+            total_vaccinated.append(total_full_vax)
+            total_vaccinations.append(total_vax - total_full_vax)
             movingWindow[index] = day_data["change_vaccinations"]
             if day_data["change_vaccinated"] != None:
                 movingWindow2[index] = day_data["change_vaccinated"]
@@ -101,14 +115,8 @@ def plotVaccinationsForURL(url, title="Vaccinations", outputImage="vaccinations.
 
     fig, ax = plt.subplots()
     ax.set_title(title)
-    ln1 = ax.plot(dates, total_vaccinations, color="c", label="Total Vaccinations")
-    ln2 = ax.plot(
-        dates, total_vaccines_distributed, color="r", label="Vaccines Distributed"
-    )
-    ln3 = ax.plot(dates, total_vaccinated, color="m", label="Fully Vaccinated")
-    ax.get_yaxis().set_major_formatter(
-        pltticker.FuncFormatter(lambda x, p: format(int(x), ","))
-    )
+    ln1 = ax.plot(dates, total_vaccinations, color="c", label="1-shot %")
+    ln3 = ax.plot(dates, total_vaccinated, color="m", label="2-shot %")
     ax.set_ylabel("Total Vaccinations")
     plt.xticks(rotation=45)
 
@@ -130,7 +138,7 @@ def plotVaccinationsForURL(url, title="Vaccinations", outputImage="vaccinations.
         pltticker.FuncFormatter(lambda x, p: format(int(x), ","))
     )
     ax2.set_ylabel("New Vaccinations")
-    lns = ln1 + ln2 + ln3 + ln4 + ln5
+    lns = ln1 + ln3 + ln4 + ln5
     labs = [l.get_label() for l in lns]
     ax.legend(lns, labs, loc=0)
     fig.savefig(outputImage, format="png", dpi=300, bbox_inches="tight")
@@ -138,7 +146,9 @@ def plotVaccinationsForURL(url, title="Vaccinations", outputImage="vaccinations.
 
 
 def plotCanadaVaccinations():
-    plotVaccinationsForURL(urlCanada, "Vaccinations for Canada", canadaVaccineImage)
+    plotVaccinationsForURL(
+        urlCanada, "Vaccinations for Canada", canadaVaccineImage, canadaPopulation
+    )
 
 
 def plotVaccinations(province="Ontario") -> bool:
@@ -151,6 +161,7 @@ def plotVaccinations(province="Ontario") -> bool:
             urlProvince + urlSuffix[province],
             "Vaccinations for " + province,
             stateVaccineImage,
+            populationData[urlSuffix[province]],
         )
         return True
 
@@ -222,6 +233,8 @@ def main() -> None:
         )
 
     print(getCanadaSummary())
+    plotCanadaVaccinations()
+    plotVaccinations("Ontario")
 
 
 if __name__ == "__main__":

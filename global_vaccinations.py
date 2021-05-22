@@ -121,7 +121,7 @@ def plotCountryVaccinations(country: str = "United States"):
     )
     current_df.plot(
         kind="line",
-        color="r",
+        color="m",
         figsize=(10, 6),
         rot=30,
         ax=ax,
@@ -129,7 +129,7 @@ def plotCountryVaccinations(country: str = "United States"):
     )
     ax2 = current_df.plot(
         kind="line",
-        color="m",
+        color="b",
         figsize=(10, 6),
         rot=30,
         ax=ax,
