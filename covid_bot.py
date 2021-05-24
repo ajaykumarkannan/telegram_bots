@@ -151,17 +151,21 @@ def get_once(update: Update, context: CallbackContext) -> None:
     """Add a job to the queue."""
     country = "canada"
     state = "ontario"
-    if len(context.args) >= 1:
-        country = str(context.args[0]).lower()
-        state = None
-    if len(context.args) >= 2:
-        state = str(" ".join(context.args[1:])).lower()
-    update.message.reply_chat_action(action=ChatAction.UPLOAD_PHOTO)
-    update.message.reply_media_group(getGraphs(country=country, state=state))
-    update.message.reply_text(
-        getSummary(country=country, state=state), parse_mode="HTML"
-    )
-
+    try:
+        if len(context.args) >= 1:
+            country = str(context.args[0]).lower()
+            state = None
+        if len(context.args) >= 2:
+            state = str(" ".join(context.args[1:])).lower()
+        update.message.reply_chat_action(action=ChatAction.UPLOAD_PHOTO)
+        update.message.reply_media_group(getGraphs(country=country, state=state))
+        update.message.reply_text(
+            getSummary(country=country, state=state), parse_mode="HTML"
+        )
+    except (IndexError, ValueError):
+        update.message.reply_text("Usage: /now [country] [region]")
+    except:
+        update.message.reply_text("Country or State not found")
 
 def daily(update: Update, context: CallbackContext) -> None:
     """Add a job to the queue."""
