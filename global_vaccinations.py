@@ -2,7 +2,9 @@
 import csv
 import pandas as pd
 import prettytable as pt
-import wget
+
+# import wget
+import math
 from matplotlib import pyplot as plt
 from matplotlib import ticker as pltticker
 
@@ -85,7 +87,10 @@ def getCountrySummary(country: str = "Canada") -> str:
         if isPercent:
             table.add_row([cName, "{:.2f}".format(cData) + " %"])
         else:
-            table.add_row([cName, format(int(cData), ",d")])
+            if math.isnan(cData):
+                table.add_row([cName, "-"])
+            else:
+                table.add_row([cName, format(int(cData), ",d")])
     outputString = (
         "<b>Summary for " + country + "</b>\n<i>(as of " + str(date) + ")</i>\n"
     )
