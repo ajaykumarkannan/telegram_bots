@@ -14,12 +14,10 @@ outputCountryImage = "country_cases.png"
 def getSummary(res, title, population=None):
     summaryMapToday = {
         "- Cases": "confirmed",
-        "- Recovered": "recovered",
         "- Deaths": "deaths",
     }
     summaryMapTotal = {
         "- Cases": "confirmed",
-        "- Recovered": "recovered",
         "- Deaths": "deaths",
     }
     current_index = -1
@@ -27,7 +25,6 @@ def getSummary(res, title, population=None):
     while (
         float(currentData["change_confirmed"]) == 0.0
         and float(currentData["change_deaths"]) == 0.0
-        and float(currentData["change_recovered"]) == 0.0
     ):
         current_index -= 1
         try:
