@@ -14,12 +14,10 @@ outputCountryImage = "country_cases.png"
 def getSummary(res, title, population=None):
     summaryMapToday = {
         "- Cases": "confirmed",
-        "- Recovered": "recovered",
         "- Deaths": "deaths",
     }
     summaryMapTotal = {
         "- Cases": "confirmed",
-        "- Recovered": "recovered",
         "- Deaths": "deaths",
     }
     current_index = -1
