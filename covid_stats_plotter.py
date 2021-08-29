@@ -25,9 +25,10 @@ def getSummary(res, title, population=None):
     current_index = -1
     currentData = res[list(res)[current_index]]
     while (
+        currentData["change_confirmed"] == "na" or currentData["change_deaths"] == "na"
+    ) or (
         float(currentData["change_confirmed"]) == 0.0
         and float(currentData["change_deaths"]) == 0.0
-        and float(currentData["change_recovered"]) == 0.0
     ):
         current_index -= 1
         try:
@@ -133,7 +134,6 @@ def plottingfunction(date, cases, deaths, title, outputImage) -> None:
     labs = [l.get_label() for l in lns]
     ax.legend(lns, labs, loc=0)
     fig.subplots_adjust(bottom=0.2)
-    # plt.xticks(rotation=45)
     fig.savefig(outputImage, format="png", dpi=300, bbox_inches="tight")
     plt.close()
 

@@ -167,6 +167,7 @@ def get_once(update: Update, context: CallbackContext) -> None:
     except:
         update.message.reply_text("Country or State not found")
 
+
 def daily(update: Update, context: CallbackContext) -> None:
     """Add a job to the queue."""
     chat_id = update.message.chat_id
