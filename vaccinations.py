@@ -78,11 +78,14 @@ def plotVaccinationsForURL(
     dates = []
     total_vaccinations = []
     total_vaccinated = []
+    total_boosters_1 = []
     new_vaccinations = []
     new_vaccinated = []
+    new_boosters_1 = []
     windowSize = 7
     movingWindow = 7 * [0]
     movingWindow2 = 7 * [0]
+    movingWindow3 = 7 * [0]
     index = 0
     last = 0
 
@@ -101,15 +104,24 @@ def plotVaccinationsForURL(
                 total_full_vax = 0
             else:
                 total_full_vax = day_data["total_vaccinated"] * 100.0 / population
+            if day_data["total_boosters_1"] == None:
+                total_boosters_1 = 0
+            else:
+                total_boosters_1 = day_data["total_boosters_1"] * 100.0 / population
             total_vaccinated.append(total_full_vax)
-            total_vaccinations.append(total_vax - total_full_vax)
+            total_vaccinations.append(total_vax - total_full_vax - total_boosters_1)
             movingWindow[index] = day_data["change_vaccinations"]
             if day_data["change_vaccinated"] != None:
                 movingWindow2[index] = day_data["change_vaccinated"]
             else:
                 movingWindow2[index] = 0
+            if day_data["change_boosters_1"] == None:
+                movingWindow3[index] = 0
+            else:
+                movingWindow3[index] = day_data["change_boosters_1"]
             new_vaccinations.append(sum(movingWindow) / len(movingWindow))
             new_vaccinated.append(sum(movingWindow2) / len(movingWindow2))
+            new_boosters_1.append(sum(movingWindow3) / len(movingWindow3))
             last = index
             index = 0 if (index == (windowSize - 1)) else (index + 1)
 
@@ -191,16 +203,22 @@ def getSummaryData(url, title, population):
     summary["- Today"] = (
         jsonData["data"][-1]["change_vaccinations"]
         - jsonData["data"][-1]["change_vaccinated"]
+        - jsonData["data"][-1]["change_boosters_1"]
     )
     summary["- Total"] = (
         jsonData["data"][-1]["total_vaccinations"]
         - jsonData["data"][-1]["total_vaccinated"]
+        - jsonData["data"][-1]["total_boosters_1"]
     )
     tableAddSection("1-shot", summary, table, population)
 
     summary["- Today"] = jsonData["data"][-1]["change_vaccinated"]
     summary["- Total"] = jsonData["data"][-1]["total_vaccinated"]
     tableAddSection("2-shot", summary, table, population)
+
+    summary["- Today"] = jsonData["data"][-1]["change_boosters_1"]
+    summary["- Total"] = jsonData["data"][-1]["total_boosters_1"]
+    tableAddSection("Booster 1", summary, table, population)
 
     outputString += f"<pre>{table}</pre>"
     outputString += "\n"
